@@ -14,15 +14,9 @@ public class CurrencyDao implements Dao<Currency> {
     @Override
     public Currency get(int id) {
         Currency currency;
-        try {
-            Class.forName("org.sqlite.JDBC");
-        } catch (ClassNotFoundException e) {
-            throw new RuntimeException(e);
-        }
-        try (Connection connection = DriverManager.getConnection("jdbc:sqlite:exchanger-database.db");
-             Statement statement = connection.createStatement();
-             ResultSet resultSet = statement.executeQuery("SELECT * FROM Currencies WHERE id = "
-                     + id + ";")) {
+        try (Connection connection = DatabaseUtil.getConnection();
+             ResultSet resultSet = connection.createStatement().executeQuery(
+                     "SELECT * FROM Currencies WHERE id = " + id + ";")) {
             currency = new Currency(resultSet.getInt("id"),
                     resultSet.getString("code"),
                     resultSet.getString("fullname"),
@@ -51,14 +45,8 @@ public class CurrencyDao implements Dao<Currency> {
     @Override
     public List<Currency> getAll() {
         List<Currency> currencies = new ArrayList<>();
-        try {
-            Class.forName("org.sqlite.JDBC");
-        } catch (ClassNotFoundException e) {
-            throw new RuntimeException(e);
-        }
-        try (Connection connection = DriverManager.getConnection("jdbc:sqlite:C:\\Code\\Pets\\idea-related\\currency-exchanger\\exchanger-database");
-             Statement statement = connection.createStatement();
-             ResultSet resultSet = statement.executeQuery("SELECT * FROM Currencies;")) {
+        try (Connection connection = DatabaseUtil.getConnection();
+             ResultSet resultSet = connection.createStatement().executeQuery("SELECT * FROM Currencies;")) {
             while (resultSet.next()) {
                 currencies.add(new Currency(resultSet.getInt("id"),
                         resultSet.getString("code"),
