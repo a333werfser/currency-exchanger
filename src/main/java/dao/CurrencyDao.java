@@ -2,9 +2,7 @@ package dao;
 
 import models.Currency;
 
-import java.sql.Statement;
 import java.sql.Connection;
-import java.sql.DriverManager;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.ArrayList;
@@ -17,6 +15,21 @@ public class CurrencyDao implements Dao<Currency> {
         try (Connection connection = DatabaseUtil.getConnection();
              ResultSet resultSet = connection.createStatement().executeQuery(
                      "SELECT * FROM Currencies WHERE id = " + id + ";")) {
+            currency = new Currency(resultSet.getInt("id"),
+                    resultSet.getString("code"),
+                    resultSet.getString("fullname"),
+                    resultSet.getString("sign"));
+        } catch (SQLException e) {
+            throw new RuntimeException(e);
+        }
+        return currency;
+    }
+
+    public Currency get(String code) {
+        Currency currency;
+        try (Connection connection = DatabaseUtil.getConnection();
+             ResultSet resultSet = connection.createStatement().executeQuery(
+                     "SELECT * FROM Currencies WHERE code = \'" + code + "\';")) {
             currency = new Currency(resultSet.getInt("id"),
                     resultSet.getString("code"),
                     resultSet.getString("fullname"),
@@ -57,5 +70,18 @@ public class CurrencyDao implements Dao<Currency> {
             throw new RuntimeException(e);
         }
         return currencies;
+    }
+
+    public List<String> getAllCodes() {
+        List<String> currenciesCodes = new ArrayList<>();
+        try (Connection connection = DatabaseUtil.getConnection();
+             ResultSet resultSet = connection.createStatement().executeQuery("SELECT * FROM Currencies;")) {
+            while (resultSet.next()) {
+                currenciesCodes.add(resultSet.getString("code"));
+            }
+        } catch (SQLException e) {
+            throw new RuntimeException(e);
+        }
+        return currenciesCodes;
     }
 }
