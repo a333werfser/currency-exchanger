@@ -13,16 +13,18 @@ import java.io.PrintWriter;
 
 @WebServlet("/currency/*")
 public class CurrencyServlet extends HttpServlet {
-
     public void doGet(HttpServletRequest req, HttpServletResponse resp) throws IOException {
-        String[] urlSegments = String.valueOf(req.getRequestURI()).split("/");
-        String code = urlSegments[urlSegments.length - 1];
+        String[] urlSegments = String.valueOf(req.getRequestURL()).split("/");
+        String lastSegment = urlSegments[urlSegments.length - 1];
         CurrencyDao currencyDao = new CurrencyDao();
         try (PrintWriter out = resp.getWriter()) {
-            if (currencyDao.getAllCodes().contains(code)) {
+            if (lastSegment.equals("currency")) {
+                resp.setStatus(400);
+                resp.sendError(HttpServletResponse.SC_BAD_REQUEST);
+            } else if (currencyDao.getAllCodes().contains(lastSegment)) {
                 resp.setContentType("application/json");
                 resp.setStatus(200);
-                out.print(new ObjectMapper().writeValueAsString(currencyDao.get(code)));
+                out.print(new ObjectMapper().writeValueAsString(currencyDao.get(lastSegment)));
             } else {
                 resp.setStatus(404);
                 resp.sendError(HttpServletResponse.SC_NOT_FOUND);
