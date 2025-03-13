@@ -24,4 +24,30 @@ public class CurrenciesServlet extends HttpServlet {
             throw new RuntimeException(e);
         }
     }
+
+    public void doPost(HttpServletRequest req, HttpServletResponse resp) {
+        String fullname = req.getParameter("fullname");
+        String code = req.getParameter("code");
+        String sign = req.getParameter("sign");
+        CurrencyDao currencyDao = new CurrencyDao();
+        List<String> allCodesList = currencyDao.getAllCodes();
+
+        try (PrintWriter out = resp.getWriter()){
+            if (fullname == null || code == null || sign == null ) {
+                resp.setStatus(400);
+                resp.sendError(HttpServletResponse.SC_BAD_REQUEST);
+            } else if (allCodesList.contains(code)) {
+                resp.setStatus(409);
+                resp.sendError(HttpServletResponse.SC_CONFLICT);
+            } else {
+                Currency currency = new Currency(code, fullname, sign);
+                currencyDao.add(currency);
+                resp.setStatus(201);
+                resp.setContentType("application/json");
+                out.print(new ObjectMapper().writeValueAsString(currencyDao.get(currency.getCode())));
+            }
+        } catch (IOException e) {
+            throw new RuntimeException(e);
+        }
+    }
 }

@@ -3,6 +3,7 @@ package dao;
 import models.Currency;
 
 import java.sql.Connection;
+import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.ArrayList;
@@ -41,17 +42,26 @@ public class CurrencyDao implements Dao<Currency> {
     }
 
     @Override
-    public void add(Currency o) {
+    public void add(Currency currency) {
+        try (Connection connection = DatabaseUtil.getConnection()) {
+            PreparedStatement statement = connection.prepareStatement(
+                    "INSERT INTO Currencies (code, fullname, sign) VALUES (?, ?, ?)");
+            statement.setString(1, currency.getCode());
+            statement.setString(2, currency.getFullName());
+            statement.setString(3, currency.getSign());
+            statement.execute();
+        } catch (SQLException e) {
+            throw new RuntimeException(e);
+        }
+    }
+
+    @Override
+    public void update(Currency currency, String... params) {
 
     }
 
     @Override
-    public void update(Currency o, String... params) {
-
-    }
-
-    @Override
-    public void delete(Currency o) {
+    public void delete(Currency currency) {
 
     }
 
