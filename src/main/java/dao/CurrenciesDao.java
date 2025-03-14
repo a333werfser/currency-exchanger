@@ -9,7 +9,7 @@ import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.List;
 
-public class CurrencyDao implements Dao<Currency> {
+public class CurrenciesDao implements Dao<Currency> {
     @Override
     public Currency get(int id) {
         Currency currency;

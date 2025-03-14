@@ -1,16 +1,40 @@
 package models;
 
+import java.math.BigDecimal;
+
 public class ExchangeRate {
     private int id;
-    private int baseCurrencyId;
-    private int targetCurrencyId;
-    private double rate;
+    private Currency baseCurrency;
+    private Currency targetCurrency;
+    private BigDecimal rate;
 
-    public ExchangeRate(int id, double rate, int targetCurrencyId, int baseCurrencyId) {
+    public ExchangeRate (int id, Currency baseCurrency, Currency targetCurrency, BigDecimal rate) {
         this.id = id;
+        this.baseCurrency = baseCurrency;
+        this.targetCurrency = targetCurrency;
         this.rate = rate;
-        this.targetCurrencyId = targetCurrencyId;
-        this.baseCurrencyId = baseCurrencyId;
+    }
+
+    public ExchangeRate (Currency baseCurrency, Currency targetCurrency, BigDecimal rate) {
+        this.baseCurrency = baseCurrency;
+        this.targetCurrency = targetCurrency;
+        this.rate = rate;
+    }
+
+    public Currency getTargetCurrency() {
+        return targetCurrency;
+    }
+
+    public void setTargetCurrency(Currency targetCurrency) {
+        this.targetCurrency = targetCurrency;
+    }
+
+    public Currency getBaseCurrency() {
+        return baseCurrency;
+    }
+
+    public void setBaseCurrency(Currency baseCurrency) {
+        this.baseCurrency = baseCurrency;
     }
 
     public int getId() {
@@ -21,27 +45,11 @@ public class ExchangeRate {
         this.id = id;
     }
 
-    public double getRate() {
+    public BigDecimal getRate() {
         return rate;
     }
 
-    public void setRate(double rate) {
+    public void setRate(BigDecimal rate) {
         this.rate = rate;
-    }
-
-    public int getTargetCurrencyId() {
-        return targetCurrencyId;
-    }
-
-    public void setTargetCurrencyId(int targetCurrencyId) {
-        this.targetCurrencyId = targetCurrencyId;
-    }
-
-    public int getBaseCurrencyId() {
-        return baseCurrencyId;
-    }
-
-    public void setBaseCurrencyId(int baseCurrencyId) {
-        this.baseCurrencyId = baseCurrencyId;
     }
 }
