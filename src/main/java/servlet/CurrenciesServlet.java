@@ -1,7 +1,7 @@
 package servlet;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
-import dao.CurrencyDao;
+import dao.CurrenciesDao;
 import jakarta.servlet.annotation.WebServlet;
 import jakarta.servlet.http.HttpServlet;
 import jakarta.servlet.http.HttpServletRequest;
@@ -16,7 +16,7 @@ import java.util.List;
 public class CurrenciesServlet extends HttpServlet {
 
     public void doGet(HttpServletRequest req, HttpServletResponse resp) {
-        List<Currency> currencies = new CurrencyDao().getAll();
+        List<Currency> currencies = new CurrenciesDao().getAll();
         resp.setContentType("application/json");
         try (PrintWriter out = resp.getWriter()) {
             out.print(new ObjectMapper().writeValueAsString(currencies));
@@ -29,8 +29,8 @@ public class CurrenciesServlet extends HttpServlet {
         String fullname = req.getParameter("fullname");
         String code = req.getParameter("code");
         String sign = req.getParameter("sign");
-        CurrencyDao currencyDao = new CurrencyDao();
-        List<String> allCodesList = currencyDao.getAllCodes();
+        CurrenciesDao currenciesDao = new CurrenciesDao();
+        List<String> allCodesList = currenciesDao.getAllCodes();
 
         try (PrintWriter out = resp.getWriter()){
             if (fullname == null || code == null || sign == null ) {
@@ -41,10 +41,10 @@ public class CurrenciesServlet extends HttpServlet {
                 resp.sendError(HttpServletResponse.SC_CONFLICT);
             } else {
                 Currency currency = new Currency(code, fullname, sign);
-                currencyDao.add(currency);
+                currenciesDao.add(currency);
                 resp.setStatus(201);
                 resp.setContentType("application/json");
-                out.print(new ObjectMapper().writeValueAsString(currencyDao.get(currency.getCode())));
+                out.print(new ObjectMapper().writeValueAsString(currenciesDao.get(currency.getCode())));
             }
         } catch (IOException e) {
             throw new RuntimeException(e);

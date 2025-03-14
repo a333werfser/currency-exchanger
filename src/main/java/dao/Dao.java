@@ -1,5 +1,6 @@
 package dao;
 
+import java.sql.SQLException;
 import java.util.List;
 
 public interface Dao<T> {
@@ -12,5 +13,5 @@ public interface Dao<T> {
 
     void delete(T t);
 
-    List<T> getAll();
+    List<T> getAll() throws SQLException;
 }
