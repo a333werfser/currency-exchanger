@@ -13,6 +13,7 @@ import java.io.PrintWriter;
 
 @WebServlet("/currency/*")
 public class CurrencyServlet extends HttpServlet {
+
     public void doGet(HttpServletRequest req, HttpServletResponse resp) throws IOException {
         String[] urlSegments = String.valueOf(req.getRequestURL()).split("/");
         String lastSegment = urlSegments[urlSegments.length - 1];
