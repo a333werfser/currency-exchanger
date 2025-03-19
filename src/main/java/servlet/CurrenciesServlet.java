@@ -7,47 +7,37 @@ import jakarta.servlet.http.HttpServlet;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import models.Currency;
+import util.ServletErrorMessage;
+import util.ServletJsonResponse;
 
-import java.io.IOException;
-import java.io.PrintWriter;
 import java.util.List;
 
 @WebServlet("/currencies")
 public class CurrenciesServlet extends HttpServlet {
 
-    public void doGet(HttpServletRequest req, HttpServletResponse resp) {
+    public void doGet(HttpServletRequest request, HttpServletResponse response) {
         List<Currency> currencies = new CurrenciesDao().getAll();
-        resp.setContentType("application/json");
-        try (PrintWriter out = resp.getWriter()) {
-            out.print(new ObjectMapper().writeValueAsString(currencies));
-        } catch (IOException e) {
-            throw new RuntimeException(e);
-        }
+        ServletJsonResponse.send(response, 200, currencies);
     }
 
-    public void doPost(HttpServletRequest req, HttpServletResponse resp) {
-        String fullname = req.getParameter("fullname");
-        String code = req.getParameter("code");
-        String sign = req.getParameter("sign");
-        CurrenciesDao currenciesDao = new CurrenciesDao();
-        List<String> allCodesList = currenciesDao.getAllCodes();
+    public void doPost(HttpServletRequest request, HttpServletResponse response) {
+        String fullname = request.getParameter("fullname");
+        String code = request.getParameter("code");
+        String sign = request.getParameter("sign");
 
-        try (PrintWriter out = resp.getWriter()){
-            if (fullname == null || code == null || sign == null ) {
-                resp.setStatus(400);
-                resp.sendError(HttpServletResponse.SC_BAD_REQUEST);
-            } else if (allCodesList.contains(code)) {
-                resp.setStatus(409);
-                resp.sendError(HttpServletResponse.SC_CONFLICT);
-            } else {
-                Currency currency = new Currency(code, fullname, sign);
-                currenciesDao.add(currency);
-                resp.setStatus(201);
-                resp.setContentType("application/json");
-                out.print(new ObjectMapper().writeValueAsString(currenciesDao.get(currency.getCode())));
-            }
-        } catch (IOException e) {
-            throw new RuntimeException(e);
+        CurrenciesDao currenciesDao = new CurrenciesDao();
+
+        if (fullname == null || code == null || sign == null) {
+            ServletJsonResponse.send(response, 400, new ServletErrorMessage(
+                    "Отсутствует нужное поле формы"));
+        } else if (currenciesDao.getAllCodes().contains(code)) {
+            ServletJsonResponse.send(response, 409, new ServletErrorMessage(
+                    "Валюта с таким кодом уже существует"));
+        } else {
+            Currency currency = new Currency(code, fullname, sign);
+            currenciesDao.add(currency);
+            Currency addedCurrency = currenciesDao.get(code);
+            ServletJsonResponse.send(response, 201, addedCurrency);
         }
     }
 }

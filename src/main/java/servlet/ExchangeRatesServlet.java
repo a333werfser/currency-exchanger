@@ -10,25 +10,17 @@ import jakarta.servlet.http.HttpServletResponse;
 import models.ExchangeRate;
 import util.ServletErrorMessage;
 import util.ServletJsonResponse;
+import util.ServletUtil;
 
-import java.io.IOException;
-import java.io.PrintWriter;
 import java.math.BigDecimal;
 import java.util.List;
-import java.util.Map;
 
 @WebServlet("/exchangeRates")
 public class ExchangeRatesServlet extends HttpServlet {
 
-    public void doGet(HttpServletRequest req, HttpServletResponse resp) {
+    public void doGet(HttpServletRequest request, HttpServletResponse response) {
         List<ExchangeRate> exchangeRates = new ExchangeRatesDao().getAll();
-        try (PrintWriter out = resp.getWriter()){
-            resp.setStatus(200);
-            resp.setContentType("application/json");
-            out.print(new ObjectMapper().writeValueAsString(exchangeRates));
-        } catch (IOException e) {
-            throw new RuntimeException(e);
-        }
+        ServletJsonResponse.send(response, 200, exchangeRates);
     }
 
     public void doPost(HttpServletRequest request, HttpServletResponse response) {
@@ -39,44 +31,25 @@ public class ExchangeRatesServlet extends HttpServlet {
         if (baseCurrencyCode == null || targetCurrencyCode == null || rate == null) {
             ServletJsonResponse.send(response, 400, new ServletErrorMessage(
                     "Отсутствует нужное поле формы"));
-        } else if (codesNotExist(baseCurrencyCode, targetCurrencyCode)) {
+        } else if (ServletUtil.codesNotExist(baseCurrencyCode, targetCurrencyCode)) {
             ServletJsonResponse.send(response, 404, new ServletErrorMessage(
                     "Одна (или обе) валюты из валютной пары не существуют в БД"));
-        } else if (exchangeRateExists(baseCurrencyCode, targetCurrencyCode)) {
+        } else if (ServletUtil.exchangeRateExists(baseCurrencyCode, targetCurrencyCode)) {
             ServletJsonResponse.send(response, 409, new ServletErrorMessage(
                     "Валютная пара с такими кодами уже существует"));
         } else {
-            new ExchangeRatesDao().add(new ExchangeRate(
-                    new CurrenciesDao().get(baseCurrencyCode),
-                    new CurrenciesDao().get(targetCurrencyCode),
+            CurrenciesDao currenciesDao = new CurrenciesDao();
+            ExchangeRatesDao exchangeRatesDao = new ExchangeRatesDao();
+
+            exchangeRatesDao.add(new ExchangeRate(
+                    currenciesDao.get(baseCurrencyCode),
+                    currenciesDao.get(targetCurrencyCode),
                     new BigDecimal(rate)));
-            ExchangeRate exchangeRate = new ExchangeRatesDao().get(
-                    new CurrenciesDao().get(baseCurrencyCode).getId(),
-                    new CurrenciesDao().get(targetCurrencyCode).getId());
-            ServletJsonResponse.send(response, 201, exchangeRate);
-        }
-    }
+            ExchangeRate addedExchangeRate = exchangeRatesDao.get(
+                    currenciesDao.get(baseCurrencyCode).getId(),
+                    currenciesDao.get(targetCurrencyCode).getId());
 
-    public boolean codesNotExist(String baseCurrencyCode, String targetCurrencyCode) {
-        List<String> codes = new CurrenciesDao().getAllCodes();
-        return !codes.contains(baseCurrencyCode) || !codes.contains(targetCurrencyCode);
-    }
-
-    public boolean exchangeRateExists(String baseCurrencyCode, String targetCurrencyCode) {
-        boolean exists = false;
-        if (codesNotExist(baseCurrencyCode, targetCurrencyCode)) {
-            return exists;
+            ServletJsonResponse.send(response, 201, addedExchangeRate);
         }
-        CurrenciesDao currenciesDao = new CurrenciesDao();
-        int baseCurrencyId = currenciesDao.get(baseCurrencyCode).getId();
-        int targetCurrencyId = currenciesDao.get(targetCurrencyCode).getId();
-
-        for (Map.Entry<Integer, Integer> entry : new ExchangeRatesDao().getAllIdPairs().entrySet()) {
-            if (entry.getKey() == baseCurrencyId && entry.getValue() == targetCurrencyId) {
-                exists = true;
-                break;
-            }
-        }
-        return exists;
     }
 }

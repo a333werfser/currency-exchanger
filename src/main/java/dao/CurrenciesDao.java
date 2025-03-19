@@ -12,25 +12,25 @@ import java.util.List;
 public class CurrenciesDao implements Dao<Currency> {
     @Override
     public Currency get(int id) {
-        Currency currency;
         try (Connection connection = DatabaseUtil.getConnection();
              ResultSet resultSet = connection.createStatement().executeQuery(
                      "SELECT * FROM Currencies WHERE id = " + id + ";")) {
-            currency = new Currency(resultSet.getInt("id"),
+            return new Currency(resultSet.getInt("id"),
                     resultSet.getString("code"),
                     resultSet.getString("fullname"),
                     resultSet.getString("sign"));
         } catch (SQLException e) {
             throw new RuntimeException(e);
         }
-        return currency;
     }
 
     public Currency get(String code) {
         Currency currency;
-        try (Connection connection = DatabaseUtil.getConnection();
-             ResultSet resultSet = connection.createStatement().executeQuery(
-                     "SELECT * FROM Currencies WHERE code = \'" + code + "\';")) {
+        try (Connection connection = DatabaseUtil.getConnection()) {
+            PreparedStatement statement = connection.prepareStatement(
+                    "SELECT * FROM Currencies WHERE code = ?");
+            statement.setString(1, code);
+            ResultSet resultSet = statement.executeQuery();
             currency = new Currency(resultSet.getInt("id"),
                     resultSet.getString("code"),
                     resultSet.getString("fullname"),
@@ -49,7 +49,7 @@ public class CurrenciesDao implements Dao<Currency> {
             statement.setString(1, currency.getCode());
             statement.setString(2, currency.getFullName());
             statement.setString(3, currency.getSign());
-            statement.execute();
+            statement.executeQuery();
         } catch (SQLException e) {
             throw new RuntimeException(e);
         }
@@ -57,11 +57,6 @@ public class CurrenciesDao implements Dao<Currency> {
 
     @Override
     public void update(Currency currency, String... params) {
-
-    }
-
-    @Override
-    public void delete(Currency currency) {
 
     }
 
