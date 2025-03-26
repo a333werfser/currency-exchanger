@@ -3,9 +3,13 @@ package util;
 import dao.CurrenciesDao;
 import dao.ExchangeRatesDao;
 import jakarta.servlet.http.HttpServletRequest;
+import models.Currency;
 import models.ExchangeRate;
 
+import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 
 public class ServletUtil {
 
@@ -36,5 +40,38 @@ public class ServletUtil {
             }
         }
         return exists;
+    }
+
+    public static ExchangeRate[] getSimilarExchangeRates(String code1, String code2) {
+        if (codesNotExist(code1, code2)) {
+            return null;
+        }
+
+        ExchangeRate[] array = new ExchangeRate[2];
+
+        List<ExchangeRate> someExchangeRates = new ArrayList<>();
+
+        for (ExchangeRate exchangeRate : new ExchangeRatesDao().getAll()) {
+            if (exchangeRate.getTargetCurrency().getCode().equals(code1) ||
+                exchangeRate.getTargetCurrency().getCode().equals(code2)) {
+                someExchangeRates.add(exchangeRate);
+            }
+        }
+
+        for (int i = 0; i < someExchangeRates.size(); i++) {
+            Currency baseCurrency = someExchangeRates.get(i).getBaseCurrency();
+
+            for (int j = 0; j < someExchangeRates.size(); j++) {
+                int index = 0;
+                if (i != j) {
+                    Currency baseCurrency2 = someExchangeRates.get(j).getBaseCurrency();
+                    if (baseCurrency.getCode().equals(baseCurrency2.getCode())) {
+                        array[index++] = someExchangeRates.get(i);
+                        array[index] = someExchangeRates.get(j);
+                    }
+                }
+            }
+        }
+        return array;
     }
 }
