@@ -9,7 +9,7 @@ public interface Dao<T> {
 
     void add(T t);
 
-    void update(T t, String... params);
+    void update(T t, String field) throws SQLException;
 
     List<T> getAll() throws SQLException;
 }

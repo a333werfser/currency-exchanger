@@ -56,7 +56,7 @@ public class CurrenciesDao implements Dao<Currency> {
     }
 
     @Override
-    public void update(Currency currency, String... params) {
+    public void update(Currency currency, String field) {
 
     }
 

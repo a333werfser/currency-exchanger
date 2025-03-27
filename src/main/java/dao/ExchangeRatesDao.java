@@ -2,6 +2,7 @@ package dao;
 
 import models.ExchangeRate;
 
+import java.math.BigDecimal;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
@@ -63,8 +64,16 @@ public class ExchangeRatesDao implements Dao<ExchangeRate> {
     }
 
     @Override
-    public void update(ExchangeRate o, String... params) {
-
+    public void update(ExchangeRate o, String rate) throws SQLException {
+        try (Connection connection = DatabaseUtil.getConnection()) {
+            PreparedStatement statement = connection.prepareStatement(
+                    "UPDATE ExchangeRates SET Rate = ? WHERE BaseCurrencyId = ? " +
+                            "AND TargetCurrencyId = ?;");
+            statement.setBigDecimal(1, new BigDecimal(rate));
+            statement.setInt(2, o.getBaseCurrency().getId());
+            statement.setInt(3, o.getTargetCurrency().getId());
+            statement.executeUpdate();
+        }
     }
 
     @Override
