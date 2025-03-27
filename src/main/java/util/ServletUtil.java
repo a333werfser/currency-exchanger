@@ -3,9 +3,13 @@ package util;
 import dao.CurrenciesDao;
 import dao.ExchangeRatesDao;
 import jakarta.servlet.http.HttpServletRequest;
+import models.Currency;
 import models.ExchangeRate;
 
+import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 
 public class ServletUtil {
 
