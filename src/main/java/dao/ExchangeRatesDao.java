@@ -1,6 +1,8 @@
 package dao;
 
+import models.Currency;
 import models.ExchangeRate;
+import util.ServletUtil;
 
 import java.math.BigDecimal;
 import java.sql.Connection;
@@ -91,5 +93,43 @@ public class ExchangeRatesDao implements Dao<ExchangeRate> {
             throw new RuntimeException(e);
         }
         return exchangeRates;
+    }
+
+    public ExchangeRate[] getSimilarExchangeRates(String code1, String code2) {
+        if (ServletUtil.codesNotExist(code1, code2)) {
+            return null;
+        }
+
+        ExchangeRate[] similarExchangeRates = new ExchangeRate[2];
+        List<ExchangeRate> filteredExchangeRate = new ArrayList<>();
+
+        for (ExchangeRate exchangeRate : new ExchangeRatesDao().getAll()) {
+            if (exchangeRate.getTargetCurrency().getCode().equals(code1) ||
+                    exchangeRate.getTargetCurrency().getCode().equals(code2)) {
+                filteredExchangeRate.add(exchangeRate);
+            }
+        }
+
+        for (int i = 0; i < filteredExchangeRate.size(); i++) {
+            Currency baseCurrency = filteredExchangeRate.get(i).getBaseCurrency();
+
+            for (int j = 0; j < filteredExchangeRate.size(); j++) {
+                if (i != j) {
+                    int index = 0;
+                    Currency baseCurrency2 = filteredExchangeRate.get(j).getBaseCurrency();
+                    if (baseCurrency.getCode().equals(baseCurrency2.getCode())) {
+                        similarExchangeRates[index++] = filteredExchangeRate.get(i);
+                        similarExchangeRates[index] = filteredExchangeRate.get(j);
+                    }
+                }
+            }
+        }
+
+        if (similarExchangeRates[0] == null || similarExchangeRates[1] == null) {
+            return null;
+        }
+        else {
+            return similarExchangeRates;
+        }
     }
 }

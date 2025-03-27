@@ -12,7 +12,7 @@ public class ExchangeRateDto {
     BigDecimal amount;
     BigDecimal convertedAmount;
 
-    public ExchangeRateDto(Currency targetCurrency, Currency baseCurrency,
+    public ExchangeRateDto(Currency baseCurrency, Currency targetCurrency,
                            BigDecimal rate, BigDecimal amount, BigDecimal convertedAmount) {
         this.baseCurrency = baseCurrency;
         this.targetCurrency = targetCurrency;
